@@ -1,0 +1,31 @@
+GEM
+  remote: https://rubygems.org/
+  specs:
+    addressable (2.5.1)
+      public_suffix (~> 2.0, >= 2.0.2)
+    coderay (1.1.1)
+    faraday (0.12.1)
+      multipart-post (>= 1.2, < 3)
+    json (2.1.0)
+    koala (3.0.0)
+      addressable
+      faraday
+      json (>= 1.8)
+    method_source (0.8.2)
+    multipart-post (2.0.0)
+    pry (0.10.4)
+      coderay (~> 1.1.0)
+      method_source (~> 0.8.1)
+      slop (~> 3.4)
+    public_suffix (2.0.5)
+    slop (3.6.0)
+
+PLATFORMS
+  ruby
+
+DEPENDENCIES
+  koala
+  pry
+
+BUNDLED WITH
+   1.15.1
