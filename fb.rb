@@ -3,7 +3,7 @@ require 'yaml'
 require 'date'
 require 'slack-ruby-client'
 
-config = YAML.load_file 'config.yml'
+config = YAML.load_file File.join(__dir__, 'config.yml')
 LAST_CHECK = config['last_check']
 raise 'no last check date in config.yml' if LAST_CHECK.nil?
 Koala.config.api_version = 'v2.9'
