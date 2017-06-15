@@ -3,17 +3,18 @@ require 'yaml'
 require 'date'
 require 'slack-ruby-client'
 
-config = YAML.load_file File.join(__dir__, 'config.yml')
+raise unless ARGV.count == 1
+config = YAML.load_file ARGV.first
+slack = Slack::Web::Client.new(token: config['slack_token'])
+begin
 LAST_CHECK = config['last_check']
 raise 'no last check date in config.yml' if LAST_CHECK.nil?
 Koala.config.api_version = 'v2.9'
 graph = Koala::Facebook::API.new config['access_token']
-slack = Slack::Web::Client.new(token: config['slack_token'])
-raise unless ARGV.count == 2
-CHANNEL = ARGV.first
-GROUP_ID = ARGV[1]
+CHANNEL = config['channel']
+GROUP_ID = config['group_id']
 config['last_check'] = DateTime.now
-File.write(File.join(__dir__, 'config.yml'), YAML.dump(config))
+File.write(ARGV.first, YAML.dump(config))
 
 feed, files = graph.batch do |api|
   api.get_object GROUP_ID + '/feed', {since: LAST_CHECK.to_s,
@@ -47,4 +48,8 @@ end
 files.each do |f|
   slack.chat_postMessage(channel: CHANNEL, text: "*New file was posted by %s*" % f['from']['name'], as_user: true)
   slack.chat_postMessage(channel: CHANNEL, text: f['download_link'], as_user: true)
+end
+
+rescue => e
+  slack.chat_postMessage(channel: '@jerryskye', text: "```#{e.class}: #{e}\n#{e.backtrace.join("\n")}```", as_user: true)
 end
