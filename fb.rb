@@ -13,7 +13,7 @@ raise unless ARGV.count == 2
 CHANNEL = ARGV.first
 GROUP_ID = ARGV[1]
 config['last_check'] = DateTime.now
-File.write 'config.yml', YAML.dump(config)
+File.write(File.join(__dir__, 'config.yml'), YAML.dump(config))
 
 feed, files = graph.batch do |api|
   api.get_object GROUP_ID + '/feed', {since: LAST_CHECK.to_s,
