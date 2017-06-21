@@ -5,7 +5,7 @@ require 'yaml'
 
 set :config, YAML.load_file('config.yml')
 Koala.config.api_version = 'v2.9'
-set :oauth, Koala::Facebook::OAuth.new(settings.config['app_id'], settings.config['app_secret'], 'http://localhost:4567/gettoken')
+set :oauth, Koala::Facebook::OAuth.new(settings.config['app_id'], settings.config['app_secret'], settings.config['redirect_url'])
 
 get '/' do
   redirect settings.oauth.url_for_oauth_code(permissions: 'user_managed_groups')

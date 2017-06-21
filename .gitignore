@@ -1,4 +1,5 @@
 Gemfile.lock
 *.yml
 *.db
-*.log
+log/
+tmp/
