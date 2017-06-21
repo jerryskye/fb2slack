@@ -8,7 +8,7 @@ config = YAML.load_file ARGV.first
 slack = Slack::Web::Client.new(token: config['slack_token'])
 begin
 LAST_CHECK = config['last_check']
-raise 'no last check date in config.yml' if LAST_CHECK.nil?
+raise 'no last check date in config' if LAST_CHECK.nil?
 Koala.config.api_version = 'v2.9'
 graph = Koala::Facebook::API.new config['access_token']
 CHANNEL = config['channel']
