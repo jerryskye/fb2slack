@@ -10,7 +10,7 @@ SLACK = Slack::Web::Client.new(token: config['slack_token'])
 begin
 LAST_CHECK = config['last_check']
 raise 'no last check date in config' if LAST_CHECK.nil?
-Koala.config.api_version = 'v2.9'
+Koala.config.api_version = 'v2.10'
 GRAPH = Koala::Facebook::API.new config['access_token']
 CHANNEL = config['channel']
 GROUP_ID = config['group_id']
@@ -22,9 +22,7 @@ def post_to_slack post
 end
 
 def get_attachments post
-  if post['attachments'].nil?
-    nil
-  else
+  unless post['attachments'].nil?
     post['attachments']['data'].map do |attachment|
       case attachment['type']
       when 'photo'
@@ -41,8 +39,10 @@ end
 feed = GRAPH.get_object(GROUP_ID + '/feed', {since: LAST_CHECK.to_s,
   fields: 'message,object_id,updated_time,created_time,type,story,from,permalink_url,comments.filter(stream){created_time,message,from,permalink_url,attachment,parent},link'})
 
-config['last_check'] = feed.empty?? DateTime.now : DateTime.parse(feed.first['updated_time'])
-File.write(ARGV.first, YAML.dump(config))
+unless feed.empty?
+  config['last_check'] = DateTime.parse(feed.first['updated_time'])
+  File.write(ARGV.first, YAML.dump(config))
+end
 
 feed.each do |post|
   if DateTime.parse(post['created_time']) > LAST_CHECK
