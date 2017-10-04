@@ -3,7 +3,7 @@ require 'yaml'
 require 'date'
 require 'slack-ruby-client'
 
-raise 'Usage: ruby fb.rb config_file' unless ARGV.count == 1
+raise 'Usage: ruby fb.rb config_file log_file' unless ARGV.count == 2
 config = YAML.load_file ARGV.first
 SLACK = Slack::Web::Client.new(token: config['slack_token'])
 
@@ -11,6 +11,7 @@ begin
 LAST_CHECK = config['last_check']
 raise 'no last check date in config' if LAST_CHECK.nil?
 Koala.config.api_version = 'v2.10'
+Koala::Utils.logger = Logger.new ARGV[1], 'daily'
 GRAPH = Koala::Facebook::API.new config['access_token']
 CHANNEL = config['channel']
 GROUP_ID = config['group_id']
