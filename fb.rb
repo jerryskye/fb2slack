@@ -67,7 +67,7 @@ feed.each do |post|
         else
           header = "%s replied to %s's comment." % [comment['from']['name'], parent['from']['name']]
         end
-        attachment = comment.dig('attachment', 'media', 'image', 'src') if comment['attachment']['type'] == 'photo'
+        attachment = comment.dig('attachment', 'media', 'image', 'src') if comment.dig('attachment', 'type') == 'photo'
         post_to_slack(header: header, quote: comment['message'], permalink: comment['permalink_url'], attachments: attachment)
       end
     end
