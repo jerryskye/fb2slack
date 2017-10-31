@@ -20,7 +20,7 @@ GROUP_ID = config['group_id']
 def post_to_slack post
   message = post[:quote].nil?? "*%s*\nPermalink: %s" : "*%s*\n>>>%s\nPermalink: %s"
   message << "\nAttachments: %s" unless post[:attachments].nil? or post[:attachments].empty?
-  SLACK.chat_postMessage(channel: CHANNEL, text: (message % post.values).gsub(/[&<>]/, {'&' => '&amp;', '<' => '&lt;', '>' => '&gt;'}), as_user: true)
+  SLACK.chat_postMessage(channel: CHANNEL, text: (message % post.compact.values).gsub(/[&<>]/, {'&' => '&amp;', '<' => '&lt;', '>' => '&gt;'}), as_user: true)
 end
 
 def get_attachments post
@@ -36,14 +36,18 @@ def get_attachments post
       end
     end.join("\n")
   else
-    if post['type'] == 'photo'
+    case post['type']
+    when 'photo'
       GRAPH.get_object(post['object_id'], fields: 'images')['images'].first['source']
+    when 'link'
+      post['link']
     end
   end
 end
 
 feed = GRAPH.get_object(GROUP_ID + '/feed', {since: LAST_CHECK.to_s,
   fields: 'message,object_id,updated_time,created_time,type,story,from,permalink_url,comments.filter(stream){created_time,message,from,permalink_url,attachment,parent},link'})
+files = GRAPH.get_object(GROUP_ID + '/files', {since: LAST_CHECK.to_s, fields: 'download_link,updated_time,from'})
 
 LOGGER.info 'feed.count: %d' % feed.count
 
@@ -72,6 +76,10 @@ feed.each do |post|
       end
     end
   end
+end
+
+files.each do |f|
+  post_to_slack(header: "A file uploaded by #{f['from']['name']} can be downloaded here:", permalink: f['download_link'])
 end
 
 rescue => e
