@@ -1,10 +1,10 @@
 require 'sinatra'
 require 'koala'
-require 'pry'
 require 'yaml'
+require 'slack-ruby-client'
 
 set :config, YAML.load_file('config.yml')
-Koala.config.api_version = 'v2.9'
+Koala.config.api_version = 'v2.11'
 set :oauth, Koala::Facebook::OAuth.new(settings.config['app_id'], settings.config['app_secret'], settings.config['redirect_url'])
 
 get '/' do
@@ -13,7 +13,8 @@ end
 
 get '/gettoken' do
   short_lived_token = settings.oauth.get_access_token(@params['code'])
-  access_token = settings.oauth.exchange_access_token(short_lived_token)
+  access_token_with_info = settings.oauth.exchange_access_token_info(short_lived_token)
+  access_token = access_token_with_info['access_token']
   graph = Koala::Facebook::API.new access_token
   graph.get_object('/me/groups').each do |group|
     fname = group['id'] + '.yml'
@@ -24,5 +25,6 @@ get '/gettoken' do
     end
   end
 
+  Slack::Web::Client.new(token: settings.config['slack_token']).reminders_add(text: 'Token expires tomorrow, pls visit https://jarek.siedlarz.com/token', time: (Time.now + access_token_with_info['expires_in'] - 86400).to_i, user: 'k_basta')
   'Dziękuję.'
 end
