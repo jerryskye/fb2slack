@@ -20,7 +20,7 @@ GROUP_ID = config['group_id']
 def post_to_slack post
   message = post[:quote].nil?? "*%s*\nPermalink: %s" : "*%s*\n>>>%s\nPermalink: %s"
   message << "\nAttachments: %s" unless post[:attachments].nil? or post[:attachments].empty?
-  SLACK.chat_postMessage(channel: CHANNEL, text: (message % post.compact.values).gsub(/[&<>]/, {'&' => '&amp;', '<' => '&lt;', '>' => '&gt;'}), as_user: true)
+  SLACK.chat_postMessage(channel: CHANNEL, text: (message % post.compact.values).gsub(/[&<>]/, {'&' => '&amp;', '<' => '&lt;', '>' => '&gt;'}), as_user: true, unfurl_links: false)
 end
 
 def get_attachments post
