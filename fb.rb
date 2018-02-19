@@ -10,7 +10,7 @@ SLACK = Slack::Web::Client.new(token: config['slack_token'])
 begin
 LAST_CHECK = config['last_check']
 raise 'no last check date in config' if LAST_CHECK.nil?
-Koala.config.api_version = 'v2.10'
+Koala.config.api_version = 'v2.12'
 LOGGER = Logger.new ARGV[1], 'daily'
 Koala::Utils.logger = LOGGER
 GRAPH = Koala::Facebook::API.new config['access_token']
@@ -45,6 +45,34 @@ def get_attachments post
   end
 end
 
+def handle_comment comment, post_author
+  if DateTime.parse(comment['created_time']) > LAST_CHECK
+    parent = comment['parent']
+    if parent.nil?
+      header = "%s commented on %s's post." % [comment['from']['name'], post_author]
+    else
+      header = "%s replied to %s's comment." % [comment['from']['name'], parent['from']['name']]
+    end
+    attachment = comment.dig('attachment', 'media', 'image', 'src') if comment.dig('attachment', 'type') == 'photo'
+    post_to_slack(header: header, quote: comment['message'], permalink: comment['permalink_url'], attachments: attachment)
+  end
+end
+
+def handle_comments comments, post_author
+  case comments
+  when Hash
+    comments['data'].each do |comment|
+      handle_comment comment, post_author
+    end
+    handle_comments(GRAPH.graph_call(*Koala::Facebook::API::GraphCollection.parse_page_url(comments['paging']['next'])), post_author) if comments.dig('paging', 'next')
+  when Koala::Facebook::API::GraphCollection
+    comments.each do |comment|
+      handle_comment comment, post_author
+    end
+    handle_comments(comments.next_page, post_author)
+  end
+end
+
 feed = GRAPH.get_object(GROUP_ID + '/feed', {since: LAST_CHECK.to_s,
   fields: 'message,object_id,updated_time,created_time,type,story,from,permalink_url,comments.filter(stream){created_time,message,from,permalink_url,attachment,parent},link'})
 files = GRAPH.get_object(GROUP_ID + '/files', {since: LAST_CHECK.to_s, fields: 'download_link,updated_time,from'})
@@ -62,20 +90,7 @@ feed.each do |post|
     post_to_slack(header: post['story'] || post['from']['name'], quote: post['message'], permalink: post['permalink_url'], attachments: get_attachments(post))
   end
 
-  unless post['comments'].nil?
-    post['comments']['data'].each do |comment|
-      if DateTime.parse(comment['created_time']) > LAST_CHECK
-        parent = comment['parent']
-        if parent.nil?
-          header = "%s commented on %s's post." % [comment['from']['name'], post['from']['name']]
-        else
-          header = "%s replied to %s's comment." % [comment['from']['name'], parent['from']['name']]
-        end
-        attachment = comment.dig('attachment', 'media', 'image', 'src') if comment.dig('attachment', 'type') == 'photo'
-        post_to_slack(header: header, quote: comment['message'], permalink: comment['permalink_url'], attachments: attachment)
-      end
-    end
-  end
+  handle_comments post['comments'], post['from']['name']
 end
 
 files.each do |f|
