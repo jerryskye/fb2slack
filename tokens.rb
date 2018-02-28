@@ -25,6 +25,6 @@ get '/gettoken' do
     end
   end
 
-  Slack::Web::Client.new(token: settings.config['slack_token']).reminders_add(text: 'Token expires tomorrow, pls visit https://jarek.siedlarz.com/token', time: (Time.now + access_token_with_info['expires_in'] - 86400).to_i, user: '@k_basta')
+  Slack::Web::Client.new(token: settings.config['slack_token']).reminders_add(text: 'Token expires tomorrow, pls visit https://jarek.siedlarz.com/token', time: (Time.now + access_token_with_info['expires_in'] - 86400).to_i, user: settings.config['user_to_remind'])
   'Dziękuję.'
 end
