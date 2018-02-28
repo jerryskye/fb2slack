@@ -5,7 +5,7 @@ require 'slack-ruby-client'
 
 set :config, YAML.load_file('config.yml')
 Koala.config.api_version = 'v2.12'
-set :oauth, Koala::Facebook::OAuth.new(settings.config['app_id'], settings.config['app_secret'], settings.config['redirect_url'])
+set :oauth, Koala::Facebook::OAuth.new(settings.config['fb_app_id'], settings.config['fb_app_secret'], settings.config['fb_redirect_url'])
 
 get '/' do
   redirect settings.oauth.url_for_oauth_code(permissions: 'user_managed_groups')

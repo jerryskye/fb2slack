@@ -13,9 +13,9 @@ raise 'no last check date in config' if LAST_CHECK.nil?
 Koala.config.api_version = 'v2.12'
 LOGGER = Logger.new ARGV[1], 'daily'
 Koala::Utils.logger = LOGGER
-GRAPH = Koala::Facebook::API.new config['access_token']
-CHANNEL = config['channel']
-GROUP_ID = config['group_id']
+GRAPH = Koala::Facebook::API.new config['fb_access_token']
+CHANNEL = config['slack_channel']
+GROUP_ID = config['fb_group_id']
 
 def post_to_slack post
   message = post[:quote].nil?? "*%s*\nPermalink: %s" : "*%s*\n>>>%s\nPermalink: %s"
