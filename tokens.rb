@@ -4,7 +4,7 @@ require 'yaml'
 require 'slack-ruby-client'
 
 set :config, YAML.load_file('config.yml')
-Koala.config.api_version = 'v2.11'
+Koala.config.api_version = 'v2.12'
 set :oauth, Koala::Facebook::OAuth.new(settings.config['app_id'], settings.config['app_secret'], settings.config['redirect_url'])
 
 get '/' do
@@ -25,6 +25,6 @@ get '/gettoken' do
     end
   end
 
-  Slack::Web::Client.new(token: settings.config['slack_token']).reminders_add(text: 'Token expires tomorrow, pls visit https://jarek.siedlarz.com/token', time: (Time.now + access_token_with_info['expires_in'] - 86400).to_i, user: 'k_basta')
+  Slack::Web::Client.new(token: settings.config['slack_token']).reminders_add(text: 'Token expires tomorrow, pls visit https://jarek.siedlarz.com/token', time: (Time.now + access_token_with_info['expires_in'] - 86400).to_i, user: '@k_basta')
   'Dziękuję.'
 end
