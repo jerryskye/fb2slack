@@ -16,6 +16,7 @@ Koala::Utils.logger = LOGGER
 GRAPH = Koala::Facebook::API.new config['fb_access_token']
 CHANNEL = config['slack_channel']
 GROUP_ID = config['fb_group_id']
+USER_TO_NOTIFY = config['slack_user_to_notify']
 
 def post_to_slack post
   message = post[:quote].nil?? "*%s*\nPermalink: %s" : "*%s*\n>>>%s\nPermalink: %s"
@@ -98,5 +99,5 @@ files.each do |f|
 end
 
 rescue => e
-  SLACK.chat_postMessage(channel: '@jerryskye', text: "```#{e.class}: #{e}\n#{e.backtrace.join("\n")}```", as_user: true)
+  SLACK.chat_postMessage(channel: USER_TO_NOTIFY, text: "```#{e.class}: #{e}\n#{e.backtrace.join("\n")}```", as_user: true)
 end

@@ -1,0 +1,7 @@
+---
+slack_token: YOUR_SLACK_BOT_TOKEN # bot token from slack app
+fb_group_id: 'YOUR_FB_GROUP_ID' # fb group id, you can find it in group's url
+slack_channel: "#general" # slack channel you want to send the posts from this fb group to, don't forget the '#' in front
+fb_access_token: FB_ACCESS_TOKEN # managed automatically
+last_check: !ruby/object:DateTime 2018-01-01 00:00:00.000000000 Z # managed automatically
+slack_user_to_notify: '@user' # slack user to send a message to when an error occurs (you, probably)

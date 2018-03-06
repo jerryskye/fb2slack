@@ -20,11 +20,11 @@ get '/gettoken' do
     fname = group['id'] + '.yml'
     if File.exists? fname
       cnf = YAML.load_file fname
-      cnf['access_token'] = access_token
+      cnf['fb_access_token'] = access_token
       File.write fname, YAML.dump(cnf)
     end
   end
 
-  Slack::Web::Client.new(token: settings.config['slack_token']).reminders_add(text: 'Token expires tomorrow, pls visit https://jarek.siedlarz.com/token', time: (Time.now + access_token_with_info['expires_in'] - 86400).to_i, user: settings.config['user_to_remind'])
+  Slack::Web::Client.new(token: settings.config['slack_token']).reminders_add(text: 'Token expires tomorrow, pls visit https://jarek.siedlarz.com/token', time: (Time.now + access_token_with_info['expires_in'] - 86400).to_i, user: settings.config['slack_user_to_remind'])
   'Dziękuję.'
 end
