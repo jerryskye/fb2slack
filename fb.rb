@@ -19,13 +19,13 @@ GROUP_ID = config['fb_group_id']
 USER_TO_NOTIFY = config['slack_user_to_notify']
 
 def post_to_slack post
-  message = post[:quote].nil?? "*%s*\nPermalink: %s" : "*%s*\n>>>%s\nPermalink: %s"
+  message = post[:quote].nil?? "*%s*\nPermalink: %s" : "*%s*\n>>> %s\nPermalink: %s"
   message << "\nAttachments: %s" unless post[:attachments].nil? or post[:attachments].empty?
   SLACK.chat_postMessage(channel: CHANNEL, text: (message % post.compact.values).gsub(/[&<>]/, {'&' => '&amp;', '<' => '&lt;', '>' => '&gt;'}), as_user: true, unfurl_links: false)
 end
 
 def get_attachments post
-  unless post['attachments'].nil?
+  if not post['attachments'].nil?
     post['attachments']['data'].map do |attachment|
       case attachment['type']
       when 'photo'
@@ -36,6 +36,13 @@ def get_attachments post
         attachment['url']
       end
     end.join("\n")
+  elsif post.has_key? 'attachment'
+    case post.dig('attachment', 'type')
+    when 'photo'
+      post.dig('attachment', 'media', 'image', 'src')
+    when 'animated_image_share'
+      post.dig('attachment', 'url')
+    end
   else
     case post['type']
     when 'photo'
@@ -54,8 +61,7 @@ def handle_comment comment, post_author
     else
       header = "%s replied to %s's comment." % [comment['from']['name'], parent['from']['name']]
     end
-    attachment = comment.dig('attachment', 'media', 'image', 'src') if comment.dig('attachment', 'type') == 'photo'
-    post_to_slack(header: header, quote: comment['message'], permalink: comment['permalink_url'], attachments: attachment)
+    post_to_slack(header: header, quote: comment['message'], permalink: comment['permalink_url'], attachments: get_attachments(comment))
   end
 end
 
