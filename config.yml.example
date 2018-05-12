@@ -2,5 +2,6 @@
 fb_app_id: 'YOUR_FB_APP_ID' # fb app id
 fb_app_secret: YOUR_FB_APP_SECRET # fb app secret
 fb_redirect_url: 'YOUR_FB_REDIRECT_URL' # fb app oauth redirect url
+fb_token_url: 'YOUR_FB_TOKEN_URL' # the url tokens.rb listens on, this is sent in the slack reminders
 slack_token: YOUR_SLACK_USER_TOKEN  # user token from slack app
 slack_user_to_remind: '@user' # slack username to set reminders for when the fb token is expiring, don't forget the '@'
