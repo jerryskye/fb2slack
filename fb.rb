@@ -75,12 +75,12 @@ def handle_comments comments
     comments['data'].each do |comment|
       handle :comment, comment
     end
-    handle_comments(GRAPH.graph_call(*Koala::Facebook::API::GraphCollection.parse_page_url(comments['paging']['next'])), post_author) if comments.dig('paging', 'next')
+    handle_comments(GRAPH.graph_call(*Koala::Facebook::API::GraphCollection.parse_page_url(comments['paging']['next']))) if comments.dig('paging', 'next')
   when Koala::Facebook::API::GraphCollection
     comments.each do |comment|
       handle :comment, comment
     end
-    handle_comments(comments.next_page, post_author)
+    handle_comments(comments.next_page)
   end
 end
 
